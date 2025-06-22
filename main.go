@@ -68,7 +68,7 @@ func main() {
 	}
 }
 
-// Trime prefix "输入:" or "输入：" or "Input:" or "Input: "
+// Trim prefix "输入:" or "输入：" or "Input:" or "Input: "
 func trimPrefixInput(s string) string {
 	s = strings.TrimPrefix(s, "输入：")
 	s = strings.TrimPrefix(s, "输入:")
@@ -78,11 +78,7 @@ func trimPrefixInput(s string) string {
 }
 
 func ProcessInput(line string, writer *bufio.Writer) {
-	fmt.Println("Processing line:", line)
-
-	// Remove the prefix "输入：" or "输入:"
 	line = trimPrefixInput(line)
-	// Remove any leading or trailing whitespace
 	line = strings.TrimSpace(line)
 	if len(line) == 0 {
 		return
@@ -91,33 +87,37 @@ func ProcessInput(line string, writer *bufio.Writer) {
 	parts := processLine(line)
 	for _, line := range parts {
 		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			// Check if it is a 2-dimensional slice
 			if is2dSlice(line) {
-				// Convert to a 2-dimensional slice
 				slice2d := convertTo2DStringSlice(line)
-				fmt.Fprintf(writer, "%d ", len(slice2d))
-				if len(slice2d) > 0 {
-					fmt.Fprintf(writer, "%d\n", len(slice2d[0]))
-					for _, innerSlice := range slice2d {
-						for _, v := range innerSlice {
-							fmt.Fprintf(writer, "%s ", v)
-						}
-						fmt.Fprintf(writer, "\n")
-					}
-				}
+				write2DSlice(writer, slice2d)
 			} else {
-				// Convert to a 1-dimensional slice
 				slice1d := convertTo1DStringSlice(line)
-				fmt.Fprintf(writer, "%d\n", len(slice1d))
-				for _, v := range slice1d {
-					fmt.Fprintf(writer, "%s ", v)
-				}
-				fmt.Fprintf(writer, "\n")
+				writeSlice(writer, slice1d)
 			}
 		} else {
 			fmt.Fprintf(writer, "%s\n", line)
 		}
 	}
+}
+
+func write2DSlice(writer *bufio.Writer, slice [][]string) {
+	fmt.Fprintf(writer, "%d ", len(slice))
+	fmt.Fprintf(writer, "%d\n", len(slice[0]))
+
+	for _, innerSlice := range slice {
+		for _, v := range innerSlice {
+			fmt.Fprintf(writer, "%s ", v)
+		}
+		fmt.Fprintf(writer, "\n")
+	}
+}
+
+func writeSlice(writer *bufio.Writer, slice []string) {
+	fmt.Fprintf(writer, "%d\n", len(slice))
+	for _, v := range slice {
+		fmt.Fprintf(writer, "%s ", v)
+	}
+	fmt.Fprintf(writer, "\n")
 }
 
 // Given a string. Check Whether it is 1-dimensional or 2-dimensional slice
