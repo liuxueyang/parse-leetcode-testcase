@@ -34,7 +34,7 @@ func main() {
 	for input.Scan() {
 		line := input.Text()
 
-		if strings.Contains(line, "输入：") || strings.Contains(line, "输入:") {
+		if strings.Contains(line, "输入：") || strings.Contains(line, "输入:") || strings.Contains(line, "Input:") || strings.Contains(line, "Input: ") {
 			ProcessInput(line, writer)
 		}
 	}
@@ -68,10 +68,20 @@ func main() {
 	}
 }
 
+// Trime prefix "输入:" or "输入：" or "Input:" or "Input: "
+func trimPrefixInput(s string) string {
+	s = strings.TrimPrefix(s, "输入：")
+	s = strings.TrimPrefix(s, "输入:")
+	s = strings.TrimPrefix(s, "Input: ")
+	s = strings.TrimPrefix(s, "Input:")
+	return strings.TrimSpace(s)
+}
+
 func ProcessInput(line string, writer *bufio.Writer) {
+	fmt.Println("Processing line:", line)
+
 	// Remove the prefix "输入：" or "输入:"
-	line = strings.TrimPrefix(line, "输入：")
-	line = strings.TrimPrefix(line, "输入:")
+	line = trimPrefixInput(line)
 	// Remove any leading or trailing whitespace
 	line = strings.TrimSpace(line)
 	if len(line) == 0 {
