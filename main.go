@@ -105,11 +105,6 @@ func ProcessInput(line string, writer *bufio.Writer) {
 				fmt.Fprintf(writer, "\n")
 			}
 		} else {
-			// If it is not a slice, just print the part
-			if strings.HasPrefix(line, "\"") || strings.HasSuffix(line, "'") {
-				// If it is a string, remove the quotes
-				line = strings.Trim(line, "\"'")
-			}
 			fmt.Fprintf(writer, "%s\n", line)
 		}
 	}

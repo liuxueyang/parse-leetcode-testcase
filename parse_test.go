@@ -1,23 +1,32 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 )
 
 func TestProcessLine(t *testing.T) {
-	line := `s = "A man, a plan, a canal: Panama", k = 1, b = "Hello, world"`
-	t.Log(line)
-	res := processLine(line)
-	t.Log(res)
-	fmt.Printf("Hello")
-
 	tests := []struct {
 		input    string
 		expected []string
 	}{
 		{`nums = [1,1,1,0,0,0,1,1,1,1,0], K = 2`, []string{"[1,1,1,0,0,0,1,1,1,1,0]", "2"}},
-		{`s = "A man, a plan, a canal: Panama", k = 1, b = "Hello, world"`, []string{"\"A man, a plan, a canal: Panama\"", "1", "\"Hello, world\""}},
+		{`s = "A man, a plan, a canal: Panama", k = 1, b = "Hello, world"`, []string{"A man, a plan, a canal: Panama", "1", "Hello, world"}},
+		{`s = "A man, a plan, a canal: Panama", k = 1, b = "Hello, world"@leetcode`, []string{"A man, a plan, a canal: Panama", "1", "Hello, world"}},
+		{`n = 4, k = 6`, []string{"4", "6"}},
+		{`nums = [6,2,8,4]`, []string{"[6,2,8,4]"}},
+		{`nums = [1,5,1,4,2]`, []string{"[1,5,1,4,2]"}},
+		{`original = [1,2,3,4], bounds = [[1,2],[2,3],[3,4],[4,5]]`, []string{"[1,2,3,4]", "[[1,2],[2,3],[3,4],[4,5]]"}},
+		{`nums = [2,7,11,15], target = 9`, []string{"[2,7,11,15]", "9"}},
+		{`l1 = [2,4,3], l2 = [5,6,4]`, []string{"[2,4,3]", "[5,6,4]"}},
+		{`s = "abcabcbb"`, []string{"abcabcbb"}},
+		{`nums1 = [1,3], nums2 = [2]`, []string{"[1,3]", "[2]"}},
+		{`s = "PAYPALISHIRING", numRows = 3`, []string{"PAYPALISHIRING", "3"}},
+		{`x = -123`, []string{"-123"}},
+		{`x = 0`, []string{"0"}},
+		{`s = "42"`, []string{"42"}},
+		{`s = "aa", p = "a*"`, []string{"aa", "a*"}},
+		{`nums = [-1,0,1,2,-1,-4]`, []string{"[-1,0,1,2,-1,-4]"}},
+		{`s = "()[]{}"`, []string{"()[]{}"}},
 	}
 	for _, test := range tests {
 		res := processLine(test.input)
@@ -29,8 +38,6 @@ func TestProcessLine(t *testing.T) {
 				t.Errorf("processLine(%q)[%d] = %q; want %q", test.input, i, v, test.expected[i])
 			}
 		}
-
-		t.Logf("Input: %s, Processed: %v", test.input, res)
 	}
 }
 
