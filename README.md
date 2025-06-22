@@ -9,6 +9,14 @@ go install github.com/liuxueyang/parse-leetcode-testcase@latest
 
 # Usage
 
+```
+Usage of parse-leetcode-testcase:
+  -i string
+    	The input file to read from (default "raw.txt")
+  -p string
+    	The suffix name of the file to write to
+```
+
 Copy LeetCode testcase to text file "raw.txt". Example
 
 ```txt
