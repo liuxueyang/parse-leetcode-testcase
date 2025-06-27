@@ -123,5 +123,5 @@ func writeSlice(writer *bufio.Writer, slice []string) {
 // Given a string. Check Whether it is 1-dimensional or 2-dimensional slice
 func is2dSlice(s string) bool {
 	// Check if the string contains multiple inner slices
-	return strings.Contains(s, "],[") || strings.Contains(s, "], [")
+	return strings.Contains(s, "],[") || strings.Contains(s, "], [") || (strings.HasPrefix(s, "[[") && strings.HasSuffix(s, "]]"))
 }
