@@ -65,6 +65,7 @@ func TestConvertTo2DStringSlice(t *testing.T) {
 	}{
 		{"[[\"Hello\",\"World\"],[\"Foo\",\"Bar\"]]", [][]string{{"Hello", "World"}, {"Foo", "Bar"}}},
 		{"[[1,1,1,0,0,0,1,1,1,1,0]]", [][]string{{"1", "1", "1", "0", "0", "0", "1", "1", "1", "1", "0"}}},
+		{`[[-5]]`, [][]string{{"-5"}}},
 	}
 
 	for _, test := range tests {
