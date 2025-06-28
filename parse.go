@@ -13,6 +13,7 @@ func processLine(s string) (ans []string) {
 			continue
 		}
 		part = unquoteString(removePostfix(part))
+		part = strings.TrimSpace(part)
 		ans = append(ans, part)
 	}
 

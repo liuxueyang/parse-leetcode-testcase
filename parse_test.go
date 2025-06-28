@@ -27,6 +27,7 @@ func TestProcessLine(t *testing.T) {
 		{`s = "aa", p = "a*"`, []string{"aa", "a*"}},
 		{`nums = [-1,0,1,2,-1,-4]`, []string{"[-1,0,1,2,-1,-4]"}},
 		{`s = "()[]{}"`, []string{"()[]{}"}},
+		{`nums =  [3,3,7,7,10,11,11]`, []string{"[3,3,7,7,10,11,11]"}},
 	}
 	for _, test := range tests {
 		res := processLine(test.input)
