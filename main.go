@@ -72,7 +72,9 @@ func processLines(reader io.Reader, writer io.Writer) error {
 		line := scanner.Text()
 
 		if containsAny(line, inputPrefixes) || processNext {
-			ProcessInput(line, bufWriter)
+			tmp := processRawLine(line)
+			writer.Write([]byte(tmp))
+
 			processNext = false // Reset the flag after processing input
 		} else if strings.HasSuffix(line, "=") {
 			// If the line ends with '=', it indicates the start of a new input section
@@ -143,51 +145,84 @@ func trimPrefixInput(s string) string {
 	return strings.TrimSpace(s)
 }
 
-func ProcessInput(line string, writer *bufio.Writer) {
+func processRawLine(line string) string {
+	parts := getTokens(line)
+	var sb strings.Builder
+
+	for _, line := range parts {
+		if is2DSlice(line) {
+			s := rawStrTo2DStrSlice(line)
+			tmp := twoDimSliceToStr(s)
+			sb.WriteString(tmp)
+		} else if is1DSlice(line) {
+			s := rawStrTo1DStrSlice(line)
+			tmp := oneDimSliceToStr(s)
+			sb.WriteString(tmp)
+		} else {
+			sb.WriteString(line + "\n")
+		}
+	}
+
+	return sb.String()
+}
+
+func is1DSlice(s string) bool {
+	return strings.HasPrefix(s, "[") && strings.HasSuffix(s, "]") && !is2DSlice(s)
+}
+
+func getTokens(line string) []string {
 	line = trimPrefixInput(line)
 	line = strings.TrimSpace(line)
+
 	if len(line) == 0 {
-		return
+		return nil
 	}
 
-	parts := processLine(line)
-	for _, line := range parts {
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			if is2dSlice(line) {
-				slice2d := convertTo2DStringSlice(line)
-				write2DSlice(writer, slice2d)
-			} else {
-				slice1d := convertTo1DStringSlice(line)
-				writeSlice(writer, slice1d)
-			}
-		} else {
-			fmt.Fprintf(writer, "%s\n", line)
-		}
-	}
+	return doGetTokens(line)
 }
 
-func write2DSlice(writer *bufio.Writer, slice [][]string) {
-	fmt.Fprintf(writer, "%d ", len(slice))
-	fmt.Fprintf(writer, "%d\n", len(slice[0]))
+func twoDimSliceToStr(slice [][]string) string {
+	var sb strings.Builder
+	n := len(slice)
+	m := len(slice[0])
+
+	sb.WriteString(fmt.Sprintf("%d %d\n", n, m))
 
 	for _, innerSlice := range slice {
-		for _, v := range innerSlice {
-			fmt.Fprintf(writer, "%s ", v)
+		for i, v := range innerSlice {
+			sb.WriteString(v)
+			if i < m-1 {
+				sb.WriteByte(' ')
+			} else {
+				sb.WriteByte('\n')
+			}
 		}
-		fmt.Fprintf(writer, "\n")
 	}
+
+	return sb.String()
 }
 
-func writeSlice(writer *bufio.Writer, slice []string) {
-	fmt.Fprintf(writer, "%d\n", len(slice))
-	for _, v := range slice {
-		fmt.Fprintf(writer, "%s ", v)
+func oneDimSliceToStr(slice []string) string {
+	var sb strings.Builder
+
+	n := len(slice)
+
+	sb.WriteString(fmt.Sprintf("%d\n", n))
+
+	for i, s := range slice {
+		sb.WriteString(s)
+		if i < n-1 {
+			sb.WriteByte(' ')
+		} else {
+			sb.WriteByte('\n')
+		}
 	}
-	fmt.Fprintf(writer, "\n")
+
+	return sb.String()
 }
 
 // Given a string. Check Whether it is 1-dimensional or 2-dimensional slice
-func is2dSlice(s string) bool {
+func is2DSlice(s string) bool {
 	// Check if the string contains multiple inner slices
 	return strings.Contains(s, "],[") || strings.Contains(s, "], [") || (strings.HasPrefix(s, "[[") && strings.HasSuffix(s, "]]"))
 }

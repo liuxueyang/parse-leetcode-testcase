@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-func processLine(s string) (ans []string) {
+func doGetTokens(s string) (ans []string) {
 	s = strings.TrimSuffix(s, "@leetcode")
 	parts := strings.Split(s, " = ")
 
@@ -41,7 +41,7 @@ func removePostfix(s string) string {
 	return s
 }
 
-func convertTo1DStringSlice(s string) []string {
+func rawStrTo1DStrSlice(s string) []string {
 	s = strings.Trim(s, "[]")
 	parts := strings.Split(s, ",")
 	result := make([]string, len(parts))
@@ -61,14 +61,14 @@ func unquoteString(s string) string {
 	return s
 }
 
-func convertTo2DStringSlice(s string) [][]string {
+func rawStrTo2DStrSlice(s string) [][]string {
 	s = strings.Trim(s, "[]")
 	innerSlices := strings.Split(s, "],[")
 
 	result := make([][]string, len(innerSlices))
 
 	for i, inner := range innerSlices {
-		result[i] = convertTo1DStringSlice(inner)
+		result[i] = rawStrTo1DStrSlice(inner)
 	}
 
 	return result

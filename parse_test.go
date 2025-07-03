@@ -28,9 +28,12 @@ func TestProcessLine(t *testing.T) {
 		{`nums = [-1,0,1,2,-1,-4]`, []string{"[-1,0,1,2,-1,-4]"}},
 		{`s = "()[]{}"`, []string{"()[]{}"}},
 		{`nums =  [3,3,7,7,10,11,11]`, []string{"[3,3,7,7,10,11,11]"}},
+		{`matrix = [[-5]], k = 1`, []string{"[[-5]]", "1"}},
+		{`matrix = [[1,5,9],[10,11,13],[12,13,15]], k = 8`, []string{"[[1,5,9],[10,11,13],[12,13,15]]", "8"}},
+		{`isConnected = [[1,0,0],[0,1,0],[0,0,1]]`, []string{"[[1,0,0],[0,1,0],[0,0,1]]"}},
 	}
 	for _, test := range tests {
-		res := processLine(test.input)
+		res := doGetTokens(test.input)
 		if len(res) != len(test.expected) {
 			t.Errorf("processLine(%q) = %v; want %v", test.input, res, test.expected)
 		}
@@ -52,7 +55,7 @@ func TestConvertTo1DStringSlice(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		result := convertTo1DStringSlice(test.input)
+		result := rawStrTo1DStrSlice(test.input)
 		if !equalStringSlices(result, test.expected) {
 			t.Errorf("convertToString1DSlice(%q) = %v; want %v", test.input, result, test.expected)
 		}
@@ -67,10 +70,11 @@ func TestConvertTo2DStringSlice(t *testing.T) {
 		{"[[\"Hello\",\"World\"],[\"Foo\",\"Bar\"]]", [][]string{{"Hello", "World"}, {"Foo", "Bar"}}},
 		{"[[1,1,1,0,0,0,1,1,1,1,0]]", [][]string{{"1", "1", "1", "0", "0", "0", "1", "1", "1", "1", "0"}}},
 		{`[[-5]]`, [][]string{{"-5"}}},
+		{`[[1,0,0],[0,1,0],[0,0,1]]`, [][]string{{"1", "0", "0"}, {"0", "1", "0"}, {"0", "0", "1"}}},
 	}
 
 	for _, test := range tests {
-		result := convertTo2DStringSlice(test.input)
+		result := rawStrTo2DStrSlice(test.input)
 		if len(result) != len(test.expected) {
 			t.Errorf("convertToString2DSlice(%q) length = %d; want %d", test.input, len(result), len(test.expected))
 			continue
