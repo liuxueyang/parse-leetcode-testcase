@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 )
@@ -49,29 +50,30 @@ func main() {
 	writeFh.Sync() // Ensure the file is synced to disk
 
 	if *name != "" {
-		// If a suffix name is provided, copy the "input.txt" to "input_<suffix>.txt"
-		// Create a new file with the suffix name
-		newName := fmt.Sprintf("input_%s.txt", *name)
-		newFile, err := os.OpenFile(newName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
-		if err != nil {
-			panic(err)
-		}
-		defer newFile.Close()
-
-		newWriter := bufio.NewWriter(newFile)
-
-		readFh, err := os.Open("input.txt")
-		if err != nil {
-			panic(err)
-		}
-		defer readFh.Close()
-
-		scanner := bufio.NewScanner(readFh)
-		for scanner.Scan() {
-			newWriter.WriteString(scanner.Text() + "\n")
-		}
-		newWriter.Flush() // Ensure all data is written to the new file
+		backupFile(*name)
 	}
+}
+
+func backupFile(fileName string) {
+	if len(fileName) == 0 {
+		return
+	}
+
+	// If a suffix name is provided, copy the "input.txt" to "input_<suffix>.txt"
+	// Create a new file with the suffix name
+	newName := fmt.Sprintf("input_%s.txt", fileName)
+	newFile, err := os.OpenFile(newName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	if err != nil {
+		panic(err)
+	}
+	defer newFile.Close()
+
+	readFh, err := os.Open("input.txt")
+	if err != nil {
+		panic(err)
+	}
+	defer readFh.Close()
+	io.Copy(bufio.NewWriter(newFile), bufio.NewReader(readFh))
 }
 
 // Trim prefix "输入:" or "输入：" or "Input:" or "Input: "
