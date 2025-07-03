@@ -30,38 +30,10 @@ func main() {
 		log.Fatalf("Error validating flags: %v\n", err)
 	}
 
-	readFh, err := os.Open(*inputFile)
+	err = processFile(*inputFile, DefaultOutputFile)
 	if err != nil {
-		log.Fatalf("Error opening input file: %v\n", err)
+		log.Fatalf("Error processing file: %v\n", err)
 	}
-	defer readFh.Close()
-
-	writeFh, err := os.OpenFile(DefaultOutputFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, FilePermission)
-	if err != nil {
-		log.Fatalf("Error opening output file: %v\n", err)
-	}
-	defer writeFh.Close()
-
-	// Create a new writer
-	writer := bufio.NewWriter(writeFh)
-
-	input := bufio.NewScanner(readFh)
-	var processNext bool
-
-	for input.Scan() {
-		line := input.Text()
-
-		if containsAny(line, inputPrefixes) || processNext {
-			ProcessInput(line, writer)
-			processNext = false // Reset the flag after processing input
-		} else if strings.HasSuffix(line, "=") {
-			// If the line ends with '=', it indicates the start of a new input section
-			processNext = true
-		}
-	}
-
-	writer.Flush() // Ensure all data is written to the file
-	writeFh.Sync() // Ensure the file is synced to disk
 
 	if *name != "" {
 		logf("Backing up file with suffix: %s\n", *name)
@@ -70,6 +42,45 @@ func main() {
 			log.Fatalf("Error backing up file: %v\n", err)
 		}
 	}
+}
+
+func processFile(inputPath, outputPath string) error {
+	readFh, err := os.Open(inputPath)
+	if err != nil {
+		log.Fatalf("Error opening input file: %v\n", err)
+	}
+	defer readFh.Close()
+
+	writeFh, err := os.OpenFile(outputPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, FilePermission)
+	if err != nil {
+		log.Fatalf("Error opening output file: %v\n", err)
+	}
+	defer writeFh.Close()
+
+	return processLines(readFh, writeFh)
+}
+
+func processLines(reader io.Reader, writer io.Writer) error {
+	scanner := bufio.NewScanner(reader)
+
+	bufWriter := bufio.NewWriter(writer)
+	defer bufWriter.Flush()
+
+	var processNext bool
+
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		if containsAny(line, inputPrefixes) || processNext {
+			ProcessInput(line, bufWriter)
+			processNext = false // Reset the flag after processing input
+		} else if strings.HasSuffix(line, "=") {
+			// If the line ends with '=', it indicates the start of a new input section
+			processNext = true
+		}
+	}
+
+	return scanner.Err()
 }
 
 func logf(format string, args ...interface{}) {
