@@ -8,6 +8,12 @@ func processLine(s string) (ans []string) {
 	s = strings.TrimSuffix(s, "@leetcode")
 	parts := strings.Split(s, " = ")
 
+	if len(parts) == 1 {
+		// If there is no '=' in the string, return the string as a single element
+		ans = append(ans, unquoteString(parts[0]))
+		return ans
+	}
+
 	for i, part := range parts {
 		if i == 0 {
 			continue

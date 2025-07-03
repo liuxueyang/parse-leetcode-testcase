@@ -31,11 +31,17 @@ func main() {
 	writer := bufio.NewWriter(writeFh)
 
 	input := bufio.NewScanner(readFh)
+	var processNext bool
+
 	for input.Scan() {
 		line := input.Text()
 
-		if strings.Contains(line, "输入：") || strings.Contains(line, "输入:") || strings.Contains(line, "Input:") || strings.Contains(line, "Input: ") {
+		if strings.Contains(line, "输入：") || strings.Contains(line, "输入:") || strings.Contains(line, "Input:") || strings.Contains(line, "Input: ") || processNext {
 			ProcessInput(line, writer)
+			processNext = false // Reset the flag after processing input
+		} else if strings.HasSuffix(line, "=") {
+			// If the line ends with '=', it indicates the start of a new input section
+			processNext = true
 		}
 	}
 
