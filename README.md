@@ -118,3 +118,34 @@ The following command will create two identical files "input.txt" and "input_a.t
 ```sh
 parse-leetcode-testcase -p a
 ```
+
+When your code failed to pass the LeetCode, you can copy the test case from the LeetCode page and paste it into "raw.txt", then run the command again to generate the input file.
+
+Example of input file "raw.txt":
+
+```txt
+示例 1：
+
+输入： start = [6,0,3], d = 2
+
+输出： 4
+
+解释：
+
+可以选择整数 8, 0 和 4 获得最大可能得分，得分为 min(|8 - 0|, |8 - 4|, |0 - 4|)，等于 4。
+
+示例 2：
+
+输入： start = [2,6,13,13], d = 5
+
+输出： 5
+
+解释：
+
+可以选择整数 2, 7, 13 和 18 获得最大可能得分，得分为 min(|2 - 7|, |2 - 13|, |2 - 18|, |7 - 13|, |7 - 18|, |13 - 18|)，等于 5。
+
+start =
+[1000000000,0]
+d =
+1000000000
+```
