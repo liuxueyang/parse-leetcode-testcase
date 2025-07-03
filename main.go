@@ -5,26 +5,40 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strings"
 )
 
+const (
+	DefaultOutputFile = "input.txt"
+	DefaultInputFile  = "raw.txt"
+	FilePermission    = 0644
+)
+
 var name = flag.String("p", "", "The suffix name of the file to write to")
 var inputFile = flag.String("i", "raw.txt", "The input file to read from")
+var verbose = flag.Bool("v", false, "Enable verbose output")
+
+var inputPrefixes = []string{"输入：", "输入:", "Input: ", "Input:"}
 
 func main() {
 	flag.Parse()
 
+	err := validateFlags()
+	if err != nil {
+		log.Fatalf("Error validating flags: %v\n", err)
+	}
+
 	readFh, err := os.Open(*inputFile)
 	if err != nil {
-		panic(err)
+		log.Fatalf("Error opening input file: %v\n", err)
 	}
 	defer readFh.Close()
 
-	// write the output to file "input.txt"
-	writeFh, err := os.OpenFile("input.txt", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	writeFh, err := os.OpenFile(DefaultOutputFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, FilePermission)
 	if err != nil {
-		panic(err)
+		log.Fatalf("Error opening output file: %v\n", err)
 	}
 	defer writeFh.Close()
 
@@ -37,7 +51,7 @@ func main() {
 	for input.Scan() {
 		line := input.Text()
 
-		if strings.Contains(line, "输入：") || strings.Contains(line, "输入:") || strings.Contains(line, "Input:") || strings.Contains(line, "Input: ") || processNext {
+		if containsAny(line, inputPrefixes) || processNext {
 			ProcessInput(line, writer)
 			processNext = false // Reset the flag after processing input
 		} else if strings.HasSuffix(line, "=") {
@@ -50,30 +64,63 @@ func main() {
 	writeFh.Sync() // Ensure the file is synced to disk
 
 	if *name != "" {
-		backupFile(*name)
+		logf("Backing up file with suffix: %s\n", *name)
+		err = backupFile(*name)
+		if err != nil {
+			log.Fatalf("Error backing up file: %v\n", err)
+		}
 	}
 }
 
-func backupFile(fileName string) {
+func logf(format string, args ...interface{}) {
+	if *verbose {
+		log.Printf(format, args...)
+	}
+}
+
+func validateFlags() error {
+	if *inputFile == "" {
+		return fmt.Errorf("input file must be specified")
+	}
+	if _, err := os.Stat(*inputFile); os.IsNotExist(err) {
+		return fmt.Errorf("input file does not exist: %s", *inputFile)
+	}
+	return nil
+}
+
+func containsAny(s string, substrs []string) bool {
+	for _, substr := range substrs {
+		if strings.Contains(s, substr) {
+			return true
+		}
+	}
+	return false
+}
+
+func backupFile(fileName string) error {
 	if len(fileName) == 0 {
-		return
+		return nil
 	}
 
-	// If a suffix name is provided, copy the "input.txt" to "input_<suffix>.txt"
-	// Create a new file with the suffix name
+	// If a suffix name is provided, copy the output file to "input_<suffix>.txt"
 	newName := fmt.Sprintf("input_%s.txt", fileName)
-	newFile, err := os.OpenFile(newName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	newFile, err := os.Create(newName)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer newFile.Close()
 
-	readFh, err := os.Open("input.txt")
+	readFh, err := os.Open(DefaultOutputFile)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer readFh.Close()
-	io.Copy(bufio.NewWriter(newFile), bufio.NewReader(readFh))
+
+	_, err = io.Copy(bufio.NewWriter(newFile), readFh)
+	if err != nil {
+		return err
+	}
+	return err
 }
 
 // Trim prefix "输入:" or "输入：" or "Input:" or "Input: "
