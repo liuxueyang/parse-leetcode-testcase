@@ -11,7 +11,7 @@ func TestProcessLine(t *testing.T) {
 	}{
 		{`nums = [1,1,1,0,0,0,1,1,1,1,0], K = 2`, []string{"[1,1,1,0,0,0,1,1,1,1,0]", "2"}},
 		{`s = "A man, a plan, a canal: Panama", k = 1, b = "Hello, world"`, []string{"A man, a plan, a canal: Panama", "1", "Hello, world"}},
-		{`s = "A man, a plan, a canal: Panama", k = 1, b = "Hello, world"@leetcode`, []string{"A man, a plan, a canal: Panama", "1", "Hello, world"}},
+		{`s = "A man, a plan, a canal: Panama", k = 1, b = "Hello, world"©leetcode`, []string{"A man, a plan, a canal: Panama", "1", "Hello, world"}},
 		{`n = 4, k = 6`, []string{"4", "6"}},
 		{`nums = [6,2,8,4]`, []string{"[6,2,8,4]"}},
 		{`nums = [1,5,1,4,2]`, []string{"[1,5,1,4,2]"}},

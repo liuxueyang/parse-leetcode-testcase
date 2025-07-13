@@ -5,12 +5,13 @@ import (
 )
 
 func doGetTokens(s string) (ans []string) {
-	s = strings.TrimSuffix(s, "@leetcode")
+	s = strings.TrimSuffix(s, "©leetcode")
 	parts := strings.Split(s, " = ")
 
 	if len(parts) == 1 {
 		// If there is no '=' in the string, return the string as a single element
-		ans = append(ans, unquoteString(parts[0]))
+		s = strings.TrimSuffix(parts[0], "©leetcode")
+		ans = append(ans, unquoteString(s))
 		return ans
 	}
 
