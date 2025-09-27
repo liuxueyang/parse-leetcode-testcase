@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -19,8 +20,18 @@ const (
 var name = flag.String("p", "", "The suffix name of the file to write to")
 var inputFile = flag.String("i", "raw.txt", "The input file to read from")
 var verbose = flag.Bool("v", false, "Enable verbose output")
+var companion = flag.Bool("companion", false, "Export to competitive companion format")
+var outputFile = flag.String("o", DefaultOutputFile, "The output file to write to")
 
 var inputPrefixes = []string{"输入：", "输入:", "Input: ", "Input:"}
+
+type TestCase struct {
+	Test string `json:"test"`
+}
+
+type TestCases struct {
+	TestCases []TestCase `json:"testcases"`
+}
 
 func main() {
 	flag.Parse()
@@ -30,7 +41,7 @@ func main() {
 		log.Fatalf("Error validating flags: %v\n", err)
 	}
 
-	err = processFile(*inputFile, DefaultOutputFile)
+	err = processFile(*inputFile, *outputFile)
 	if err != nil {
 		log.Fatalf("Error processing file: %v\n", err)
 	}
@@ -67,19 +78,42 @@ func processLines(reader io.Reader, writer io.Writer) error {
 	defer bufWriter.Flush()
 
 	var processNext bool
+	var testCases []TestCase
 
 	for scanner.Scan() {
 		line := scanner.Text()
 
 		if containsAny(line, inputPrefixes) || processNext {
 			tmp := processRawLine(line)
-			writer.Write([]byte(tmp))
+
+			if *companion {
+				testCases = append(testCases, TestCase{Test: tmp})
+			} else {
+				writer.Write([]byte(tmp))
+			}
 
 			processNext = false // Reset the flag after processing input
 		} else if strings.HasSuffix(line, "=") {
 			// If the line ends with '=', it indicates the start of a new input section
 			processNext = true
 		}
+	}
+
+	if *companion && len(testCases) > 0 {
+		// 将每个 TestCase 单独输出为 JSON 对象
+		fmt.Fprint(writer, "[\n\t")
+		for i, tc := range testCases {
+			jsonData, err := json.MarshalIndent(tc, "\t", "\t")
+			if err != nil {
+				return err
+			}
+
+			if i > 0 {
+				fmt.Fprint(writer, ",\n\t")
+			}
+			writer.Write(jsonData)
+		}
+		fmt.Fprint(writer, "\n]\n")
 	}
 
 	return scanner.Err()
