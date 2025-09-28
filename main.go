@@ -83,6 +83,7 @@ func processLines(reader io.Reader, writer io.Writer) error {
 	for scanner.Scan() {
 		line := scanner.Text()
 
+		// TODO: bug here.
 		if containsAny(line, inputPrefixes) || processNext {
 			tmp := processRawLine(line)
 
@@ -170,12 +171,12 @@ func backupFile(fileName string) error {
 	return err
 }
 
-// Trim prefix "输入:" or "输入：" or "Input:" or "Input: "
+var trimPrefixes = []string{"输入:", "输入：", "Input:", "Input: ", "input:", "input: "}
+
 func trimPrefixInput(s string) string {
-	s = strings.TrimPrefix(s, "输入：")
-	s = strings.TrimPrefix(s, "输入:")
-	s = strings.TrimPrefix(s, "Input: ")
-	s = strings.TrimPrefix(s, "Input:")
+	for _, prefix := range trimPrefixes {
+		s = strings.TrimPrefix(s, prefix)
+	}
 	return strings.TrimSpace(s)
 }
 
