@@ -79,12 +79,13 @@ func processLines(reader io.Reader, writer io.Writer) error {
 
 	var processNext bool
 	var testCases []TestCase
+	var cur string
 
 	for scanner.Scan() {
 		line := scanner.Text()
+		line = strings.TrimSpace(line)
 
-		// TODO: bug here.
-		if containsAny(line, inputPrefixes) || processNext {
+		if containsAny(line, inputPrefixes) {
 			tmp := processRawLine(line)
 
 			if *companion {
@@ -94,9 +95,27 @@ func processLines(reader io.Reader, writer io.Writer) error {
 			}
 
 			processNext = false // Reset the flag after processing input
+		} else if processNext {
+			cur += processRawLine(line)
+			processNext = false
 		} else if strings.HasSuffix(line, "=") {
 			// If the line ends with '=', it indicates the start of a new input section
 			processNext = true
+		} else if line == "----" {
+			if *companion {
+				testCases = append(testCases, TestCase{Test: cur})
+			} else {
+				writer.Write([]byte(cur))
+			}
+			cur = ""
+		}
+	}
+
+	if len(cur) > 0 {
+		if *companion {
+			testCases = append(testCases, TestCase{Test: cur})
+		} else {
+			writer.Write([]byte(cur))
 		}
 	}
 

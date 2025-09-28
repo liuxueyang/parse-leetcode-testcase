@@ -11,8 +11,12 @@ go install github.com/liuxueyang/parse-leetcode-testcase@latest
 
 ```
 Usage of ./parse-leetcode-testcase:
+  -companion
+        Export to competitive companion format
   -i string
         The input file to read from (default "raw.txt")
+  -o string
+        The output file to write to (default "input.txt")
   -p string
         The suffix name of the file to write to
   -v    Enable verbose output
@@ -144,6 +148,11 @@ Example of input file "raw.txt":
 
 可以选择整数 2, 7, 13 和 18 获得最大可能得分，得分为 min(|2 - 7|, |2 - 13|, |2 - 18|, |7 - 13|, |7 - 18|, |13 - 18|)，等于 5。
 
+start =
+[1000000000,0]
+d =
+1000000000
+----
 start =
 [1000000000,0]
 d =
