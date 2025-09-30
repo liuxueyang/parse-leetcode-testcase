@@ -120,20 +120,11 @@ func processLines(reader io.Reader, writer io.Writer) error {
 	}
 
 	if *companion && len(testCases) > 0 {
-		// 将每个 TestCase 单独输出为 JSON 对象
-		fmt.Fprint(writer, "[\n\t")
-		for i, tc := range testCases {
-			jsonData, err := json.MarshalIndent(tc, "\t", "\t")
-			if err != nil {
-				return err
-			}
-
-			if i > 0 {
-				fmt.Fprint(writer, ",\n\t")
-			}
-			writer.Write(jsonData)
+		jsonData, err := json.MarshalIndent(testCases, "", "  ")
+		if err != nil {
+			return err
 		}
-		fmt.Fprint(writer, "\n]\n")
+		writer.Write(jsonData)
 	}
 
 	return scanner.Err()
